@@ -1,0 +1,217 @@
+---
+title: "Pulling Data"
+author: "Chris Callaghan"
+date: "Last modified on `r Sys.Date()`"
+output: 
+  html_document:
+    theme: paper
+    toc: true
+    toc_depth: 2
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo    = TRUE,
+                      message = FALSE,
+                      warning = FALSE,
+                      comment = "R>")
+```
+
+## Background
+
+In order to recreate the some of the interactive visualizations found on the [50-State Report on Public Safety Site](https://50statespublicsafety.us/), we can extract the data directly from the site an store in a portable database (*.sqlite) for efficiency and ease of use. 
+
+This document includes all code used to construct a portable database with data from different sections of the aforementioned site.
+
+Load the required libraries:
+
+```{r}
+library(data.table)
+library(here)
+library(RSQLite)
+library(odbc)
+```
+
+## Pulling Data
+
+The section on the [site](https://50statespublicsafety.us/)with the most use of interactive graphics is Part 1, Strategy 1; specifically, the entry on [using data to understand crime trends](https://50statespublicsafety.us/part-1/strategy-1/#interactive-1). 
+
+To gain access to these data, inspect the page network activity, which quickly yields results. The site uses a `GET` method to pull *.csv data sets in order to build the visualization in each section. Using the URLs for each data set one can collect and reorganize the data on the site to create new visuals.
+
+First, since the crimes data sets are structured similarly but in separate tables, let's download, clean then and keep them together:
+
+```{r, message=FALSE, warning=FALSE}
+crimes <- list(
+  "arrests-crime" = "https://50statespublicsafety.us/app/themes/50state/data/arrests-dashboard/arrests-crime.csv",
+  "reported-crime" = "https://50statespublicsafety.us/app/themes/50state/data/arrests-dashboard/reported-crime.csv",
+  "homicide-crime" = "https://50statespublicsafety.us/app/themes/50state/data/arrests-dashboard/homicide-crime.csv",
+  "rape-crime" = "https://50statespublicsafety.us/app/themes/50state/data/arrests-dashboard/rape-crime.csv",
+  "robbery-crime" = "https://50statespublicsafety.us/app/themes/50state/data/arrests-dashboard/robbery-crime.csv",
+  "assault-crime" = "https://50statespublicsafety.us/app/themes/50state/data/arrests-dashboard/assault-crime.csv")
+
+crimes <- rbindlist(
+  lapply(crimes, function(x){
+    res <- fread(x, header = TRUE)
+    res <- melt(res,
+                id.vars       = c("State", "Abbrev"),
+                variable.name = "Variable",
+                value.name    = "Value")
+    temp <- strsplit(x, "/")[[1]]
+    res[["Type"]] <- sub(".csv$", "", temp[length(temp)])
+    res[["URL"]] <- x
+    res
+    })
+  )
+```
+
+Similarly, since the crime rates data sets are similar enough that they could be kept in one table:
+
+```{r}
+rates <- list(
+  "crime-rates" = "https://50statespublicsafety.us/app/themes/50state/data/crimes-dashboard/crime-rates.csv",
+  "homicide-rate" = "https://50statespublicsafety.us/app/themes/50state/data/crimes-dashboard/homicide-rate.csv",
+  "rape-rate" = "https://50statespublicsafety.us/app/themes/50state/data/crimes-dashboard/rape-rate.csv",
+  "robbery-rate" = "https://50statespublicsafety.us/app/themes/50state/data/crimes-dashboard/robbery-rate.csv",
+  "assault-rate" = "https://50statespublicsafety.us/app/themes/50state/data/crimes-dashboard/assault-rate.csv")
+
+rates <- rbindlist(
+  lapply(rates, function(x){
+    res <- fread(x, header = TRUE)
+    res <- melt(res,
+                id.vars       = c("State", "Abbrev"),
+                variable.name = "Variable",
+                value.name    = "Value")
+    temp <- strsplit(x, "/")[[1]]
+    res[["Type"]] <- sub(".csv$", "", temp[length(temp)])
+    res[["URL"]] <- x
+    res
+    })
+  )
+```
+
+The arrest data can also be kept in it own table:
+
+```{r}
+arrests <- list(
+  "homicide-arrests" = "https://50statespublicsafety.us/app/themes/50state/data/arrests-dashboard/homicide-arrests.csv",
+  "rape-arrests" = "https://50statespublicsafety.us/app/themes/50state/data/arrests-dashboard/rape-arrests.csv",
+  "robbery-arrests" = "https://50statespublicsafety.us/app/themes/50state/data/arrests-dashboard/robbery-arrests.csv",
+  "assault-arrests" = "https://50statespublicsafety.us/app/themes/50state/data/arrests-dashboard/assault-arrests.csv",
+   "drug-arrest" = "https://50statespublicsafety.us/app/themes/50state/data/arrests-dashboard/drug-arrest.csv",
+  "non-index-arrest" = "https://50statespublicsafety.us/app/themes/50state/data/arrests-dashboard/non-index-arrest.csv")
+
+arrests <- rbindlist(
+  lapply(arrests, function(x){
+    res <- fread(x, header = TRUE)
+    res <- melt(res,
+                id.vars       = c("State", "Abbrev"),
+                variable.name = "Variable",
+                value.name    = "Value")
+    temp <- strsplit(x, "/")[[1]]
+    res[["Type"]] <- sub(".csv$", "", temp[length(temp)])
+    res[["URL"]] <- x
+    res
+    })
+  )
+```
+
+Next, note that the web developers have included some of the context on their site a as a set of tables. Pull those into a separate table:
+
+```{r, warning = FALSE}
+bullets <- list(
+  "arrests-bullets" = "https://50statespublicsafety.us/app/themes/50state/data/arrests-dashboard/arrests-bullets.csv",
+  "crime-rates-bullets" = "https://50statespublicsafety.us/app/themes/50state/data/crimes-dashboard/crime-rates-bullets.csv"
+) 
+
+bullets <- rbindlist(
+  lapply(bullets, function(x) {
+    res <- fread(x, header = TRUE, sep =",")
+    temp <- strsplit(x, "/")[[1]]
+    res[["Type"]] <- sub(".csv$", "", temp[length(temp)])
+    res[["URL"]] <- x
+    res
+    })
+  )
+```
+
+Finally, pull the population area data into its own table:
+
+```{r}
+pop_area <- "https://50statespublicsafety.us/app/themes/50state/data/crimes-dashboard/pop-area.csv"
+pop_area <- fread(pop_area, col.names = c("State", "Abbrev", "Pop Area", "y1", "2007", "y2", "2017", "delta"))[, .(State, Abbrev, `Pop Area`, `2007`, `2017`, delta)]
+pop_area <- melt(pop_area,
+                 id.vars       = c("State", "Abbrev", "Pop Area", "delta"),
+                 variable.name = "Year",
+                 value.name    = "CrimeRate")
+```
+
+## Storing Data
+
+These data sets will be used later to create dynamic visualization and other products. In an effort to keep them together, store them in a portable database. Here, SQLite is used.
+
+To start, create a database:
+
+```{r}
+my_db <- dbConnect(SQLite(),
+                   here("inst/extdata/ps50sr.sqlite"))
+```
+
+Now store each table in the database, like so:
+
+```{r}
+# Arrest table
+dbWriteTable(my_db,
+             name = "arrests",
+             value = arrests,
+             row.names = FALSE,
+             overwrite = TRUE)
+# Bullet points table
+dbWriteTable(my_db,
+             name = "bullets",
+             value = bullets,
+             row.names = FALSE,
+             overwrite = TRUE)
+# Crimes table
+dbWriteTable(my_db,
+             name = "crimes",
+             value = crimes,
+             row.names = FALSE,
+             overwrite = TRUE)
+# Population by area table
+dbWriteTable(my_db,
+             name = "pop_area",
+             value = pop_area,
+             row.names = FALSE,
+             overwrite = TRUE)
+# Crime rates table
+dbWriteTable(my_db,
+             name = "rates",
+             value = rates,
+             row.names = FALSE,
+             overwrite = TRUE)
+```
+
+Check that your tables are stored in the database:
+
+```{r}
+dbListTables(my_db)
+```
+
+Check that data can be efficiently retrieved with SQL queries:
+
+```{r}
+res <- odbc::dbSendQuery(my_db, "SELECT * FROM arrests WHERE State = 'California'")
+temp <- dbFetch(res)
+dbClearResult(res)
+# only show 5 rows:
+head(temp)
+```
+
+
+Now disconnect from the database:
+
+```{r}
+dbDisconnect(my_db)
+```
+
+All done! Data has now been downloaded, reshaped and stored.

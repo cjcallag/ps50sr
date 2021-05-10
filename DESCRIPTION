@@ -1,0 +1,34 @@
+Package: ps50sr
+Title: Public Safety 50 State Report
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Christopher",
+           family = "Callaghan",
+           role = c("aut", "cre"),
+           email = "cjcallaghan88@gmail.com")
+Description: A portable R package for data and applications developed for the 50 State Report on Public Safety by the Council of State Governments Justice Center.
+License: CC0 + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Imports:
+    data.table,
+    DBI,
+    leaflet,
+    plumber,
+    sf,
+    shiny,
+    shinycssloaders,
+    shinydashboard,
+    shinythemes,
+    odbc
+Suggests:
+    knitr,
+    shinytest,
+    testthat
+Remotes:
+    rstudio/webdriver
+VignetteBuilder: knitr
+Depends:
+    R (>= 3.5)
