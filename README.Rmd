@@ -1,0 +1,42 @@
+---
+title: "`{ps50sr}`"
+output: 
+  github_document:
+    html_preview: true
+    toc: true
+    toc_depth: 2
+  editor_options:
+    chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  fig.path = "man/figures/README-",
+  out.width = "100%")
+```
+
+<!-- badges: start -->
+[![Depends](https://img.shields.io/badge/Depends-GNU_R>=3.5-blue.svg)](https://www.r-project.org/)
+<!-- badges: end -->
+
+**{ps50sr}** is a repository for the applications and tools developed by this author in support of the Council of State Government Justice Center.
+
+## Installation
+
+The R installation can be accomplished using **{remotes}**:
+
+```{r, eval = FALSE}
+if(!requireNamespace("remotes")) install.packages("remotes")
+remotes::install_github("cjcallag/ps50sr")
+```
+
+## Launching App
+
+Launching can be done programmatically like so:
+
+```{r, eval = FALSE}
+escaexplorer::launch_app(app = "ps50sr-dashboard",
+                         use_browser = TRUE)
+```
+

@@ -35,3 +35,6 @@ states_api <- function(state) {
 
 # Does this work?
 # test <- lapply(states[["Abbrev"]], function(x) {states_api(x)})
+
+# Source required files ========================================================
+source("modals.R")

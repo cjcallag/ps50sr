@@ -51,15 +51,20 @@ tab_background <- tabItem(
                    tags$br(),
                    tags$style(type = "text/css",
                               "#bolded-text {color: #606060; margin: auto; width: 90%; padding: 10px;}"),
-                   tags$h4(id = "bolded-text",
-                           "Crime data, arrest data, and victimization surveys are all necessary to understand criminal activity in a state."),
-                   tags$br(),
-                   tags$div(
-                       style = "text-align: center;",
-                       tags$img(src = "Graphic-1.1.png", width = "50%")),
-                   tags$br(),
-                   tags$p("While a historical review of reported crime, arrest, and victimization trends at the national level provides a point of comparison for states, policymakers must understand how local dynamics are influencing trends in their states in order to develop effective policies that respond to these trends."),
-                   tags$p("Without a clear, data-driven understanding of where crime is occurring, what types of crime are on the rise and in which jurisdictions, how the volume of arrests for those crimes has changed over time, and who is being victimized, law enforcement and other local criminal justice stakeholders cannot develop effective strategies to respond to crime in their communities. Insufficient data collection, reporting, and sharing between criminal justice agencies, along with limited analytical capacity within agencies, all hinder efforts to improve understanding of crime trends and to develop effective crime-prevention strategies.")
+                   column(width = 6,
+                          tags$hr(),
+                          tags$h4(id = "bolded-text",
+                                  "Crime data, arrest data, and victimization surveys are all necessary to understand criminal activity in a state."),
+                          tags$hr(),
+                          tags$br(),
+                          tags$p("While a historical review of reported crime, arrest, and victimization trends at the national level provides a point of comparison for states, policymakers must understand how local dynamics are influencing trends in their states in order to develop effective policies that respond to these trends."),
+                          tags$p("Without a clear, data-driven understanding of where crime is occurring, what types of crime are on the rise and in which jurisdictions, how the volume of arrests for those crimes has changed over time, and who is being victimized, law enforcement and other local criminal justice stakeholders cannot develop effective strategies to respond to crime in their communities. Insufficient data collection, reporting, and sharing between criminal justice agencies, along with limited analytical capacity within agencies, all hinder efforts to improve understanding of crime trends and to develop effective crime-prevention strategies.")
+                          ),
+                   column(width = 6,
+                          tags$div(
+                              style = "text-align: center;",
+                              tags$img(src = "Graphic-1.1.png", width = "90%"))
+                          )
                    )
             )
     )
@@ -104,6 +109,7 @@ tab_arrests <- tabItem(
                tags$h1("Violent crime and arrest rates vary greatly by state.")),
         column(width = 6,
                box(width = 12,
+                   height = "420px",
                    tags$p("Select a state from the drop-down menu to see how violent crime rates and arrest rates have changed between 2007 and 2017."),
                    selectInput(inputId  = "arrests_state",
                                label    = "Get data for:",
@@ -113,7 +119,14 @@ tab_arrests <- tabItem(
                    )),
         column(width = 6,
                box(width = 12,
+                   height = "420px",
                    leafletOutput("arrests_map")))
+    ),
+    fluidRow(
+        column(width = 12,
+               box(width = 12,
+                   uiOutput("arrests_box1")
+                   ))
     )
 )
 ## Crime tab -------------------------------------------------------------------

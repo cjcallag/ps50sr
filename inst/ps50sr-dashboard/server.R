@@ -1,4 +1,7 @@
 shinyServer(function(input, output) {
+    # Set up observers =========================================================
+    modal_about()
+
     get_rates_data <- eventReactive(input$rates_state, {
         con    <- dbConnect(RSQLite::SQLite(), "ps50sr.sqlite")
         on.exit(dbDisconnect(con))
@@ -47,15 +50,24 @@ shinyServer(function(input, output) {
     })
     output$rates_text1 <- renderUI({
         text <- setDT(get_rates_data()[["bullets"]])[Type == 'crime-rates-bullets']
-        HTML("<h4>", text[['""Title""']], "</h4>",
+        HTML(
+            ifelse(!identical(text[['""Title""']], character(0)),
+                   paste0("<h4>", text[['""Title""']], "</h4>"), ""),
              "<br/>",
-             text[['""Description""']])
+            ifelse(!identical(text[['""Description""']], character(0)),
+                   paste0("<p>", text[['""Description""']], "</p>"), "")
+            )
         })
     output$rates_text2 <- renderUI({
         text <- setDT(get_rates_data()[["bullets"]])[Type == 'crime-rates-bullets']
-        HTML("<ul><li>", text[['""Bullet1""']], "</li>",
-             "<li>", text[['""Bullet2""']], "</li>",
-             "<li>",text[['""Footnote1""']], "</li></ul>")
+        HTML("<ul>",
+             ifelse(!identical(text[['""Bullet1""']], character(0)) ,
+                    paste0("<li>", text[['""Bullet1""']], "</li>"), ""),
+             ifelse(!identical(text[['""Bullet1""']], character(0)) ,
+                    paste0("<li>", text[['""Bullet2""']], "</li>"), ""),
+             ifelse(!identical(text[['""Bullet1""']], character(0)) ,
+                    paste0("<li>", text[['""Footnote1""']], "</li>"), ""),
+             "</ul>")
     })
     output$rates_chart1 <- renderUI({
         res <- setDT(get_rates_data()[["rates"]])[, Type := sub("-rates|-rate", "", Type)]
@@ -168,6 +180,124 @@ shinyServer(function(input, output) {
     })
     output$arrests_text1 <- renderUI({
         text <- setDT(get_arrests_data()[["bullets"]])[Type == 'arrests-bullets']
-        HTML(sub("\"|\"\"", "", text[['""Description""']]))
+        HTML(sub("\"|\"\"|\"\"$", "", text[['""Description""']]))
+    })
+    output$arrests_box1 <- renderUI({
+        text <- setDT(get_arrests_data()[["bullets"]])[Type == 'arrests-bullets'][, '""Title""' := sub("\"|\"\"|\"\"$", "", `""Title""`)]
+        crimes  <- setDT(get_arrests_data()[["crimes"]])[Type == "reported-crime" & !Variable %like% "Percent Change"
+                                                         ][, ':='("Variable" = as.Date(paste(Variable, 1, 1, sep = "-")),
+                                                                  "Value" = as.numeric(Value))]
+        arrests <- setDT(get_arrests_data()[["crimes"]])[Type == "arrests-crime" & !Variable %like% "Percent Change"
+                                                         ][, ':='("Variable" = as.Date(paste(Variable, 1, 1, sep = "-")),
+                                                                  "Value" = as.numeric(Value))]
+        non_index <- setDT(get_arrests_data()[["arrests"]])[Type == "non-index-arrest" & !Variable %like% "Percent Change"
+                                                            ][, ':='("Variable" = as.Date(paste(Variable, 1, 1, sep = "-")),
+                                                                     "Value" = as.numeric(Value))]
+        drug <- setDT(get_arrests_data()[["arrests"]])[Type == "drug-arrest" & !Variable %like% "Percent Change"
+                                                       ][, ':='("Variable" = as.Date(paste(Variable, 1, 1, sep = "-")),
+                                                                "Value" = as.numeric(Value))]
+        group_crimes  <- setDT(get_arrests_data()[["crimes"]])[Type %chin% c("homicide-crime", "rape-crime", "robbery-crime", "assault-crime") & !Variable %like% "Percent Change"
+                                                               ][, ':='("Variable" = as.Date(paste(Variable, 1, 1, sep = "-")),
+                                                                        "Value" = as.numeric(Value))]
+        group_arrests <- setDT(get_arrests_data()[["arrests"]])[Type %chin% c("homicide-arrests", "rape-arrests", "robbery-arrests", "assault-arrests") & !Variable %like% "Percent Change"
+                                                                ][, ':='("Variable" = as.Date(paste(Variable, 1, 1, sep = "-")),
+                                                                         "Value" = as.numeric(Value))]
+        fluidPage(
+            fluidRow(
+                tags$h3(text[['""Title""']]),
+                tags$h4(paste("Overall Violent Crime and Arrests in",
+                             input$arrests_state,
+                             "(Volume), 2007–2017")),
+                plot_ly(data = arrests, x = ~Variable, y = ~Value, name = 'Arrests',
+                        mode = 'lines+markers', type = 'scatter',
+                        hoverinfo = 'y', showlegend = TRUE) %>%
+                    add_trace(data = crimes, y = ~Value, name = 'Crimes',
+                              mode = 'lines+markers', hoverinfo = 'y',
+                              showlegend = TRUE) %>%
+                    layout(xaxis = list(title = ""),
+                           yaxis = list(title = ""))
+            ),
+            fluidRow(
+                tags$h4(paste("Non-Index Crime Arrests in",
+                             input$arrests_state,
+                             "(Volume), 2007–2017")),
+                plot_ly(data = non_index, x = ~Variable, y = ~Value,
+                        type = 'scatter', mode = 'lines', fill = 'tozeroy',
+                        hoverinfo = 'y', showlegend = TRUE,
+                        name = "Other Non-Index Arrests") %>%
+                    add_trace(data = drug, x = ~Variable, y = ~Value,
+                              type = 'scatter', mode = 'lines', fill = 'tozeroy',
+                              hoverinfo = 'y', showlegend = TRUE,
+                              name = "Drug Arrests") %>%
+                    layout(xaxis = list(title = ""),
+                           yaxis = list(title = ""))
+            ),
+            fluidRow(
+                column(width = 6,
+                       column(width = 12,
+                              tags$h4("Homicide"),
+                              plot_ly(data = group_crimes[Type == "homicide-crime"],
+                                      x = ~Variable, y = ~Value,
+                                      type = 'scatter', mode = 'lines',
+                                      hoverinfo = 'y', showlegend = TRUE,
+                                      name = "Crimes") %>%
+                                  add_trace(data = group_arrests[Type == "homicide-arrests"],
+                                            x = ~Variable, y = ~Value,
+                                            type = 'scatter', mode = 'lines',
+                                            hoverinfo = 'y', showlegend = TRUE,
+                                            name = "Arrests") %>%
+                                  layout(xaxis = list(title = ""),
+                                         yaxis = list(title = ""))),
+                       column(width = 12,
+                              tags$h4("Rape"),
+                              plot_ly(data = group_crimes[Type == "robbery-crime"],
+                                      x = ~Variable, y = ~Value,
+                                      type = 'scatter', mode = 'lines',
+                                      hoverinfo = 'y', showlegend = TRUE,
+                                      name = "Crimes") %>%
+                                  add_trace(data = group_arrests[Type == "robbery-arrests"],
+                                            x = ~Variable, y = ~Value,
+                                            type = 'scatter', mode = 'lines',
+                                            hoverinfo = 'y', showlegend = TRUE,
+                                            name = "Arrests") %>%
+                                  layout(xaxis = list(title = ""),
+                                         yaxis = list(title = "")))
+                       ),
+                column(width = 6,
+                       column(width = 12,
+                              tags$h4("Robbery"),
+                              plot_ly(data = group_crimes[Type == "rape-crime"],
+                                      x = ~Variable, y = ~Value,
+                                      type = 'scatter', mode = 'lines',
+                                      hoverinfo = 'y', showlegend = TRUE,
+                                      name = "Crimes") %>%
+                                  add_trace(data = group_arrests[Type == "rape-arrests"],
+                                            x = ~Variable, y = ~Value,
+                                            type = 'scatter', mode = 'lines',
+                                            hoverinfo = 'y', showlegend = TRUE,
+                                            name = "Arrests") %>%
+                                  layout(xaxis = list(title = ""),
+                                         yaxis = list(title = ""))),
+                       column(width = 12,
+                              tags$h4("Aggravated Assault"),
+                              plot_ly(data = group_crimes[Type == "assault-crime"],
+                                      x = ~Variable, y = ~Value,
+                                      type = 'scatter', mode = 'lines',
+                                      hoverinfo = 'y', showlegend = TRUE,
+                                      name = "Crimes") %>%
+                                  add_trace(data = group_arrests[Type == "assault-arrests"],
+                                            x = ~Variable, y = ~Value,
+                                            type = 'scatter', mode = 'lines',
+                                            hoverinfo = 'y', showlegend = TRUE,
+                                            name = "Arrests") %>%
+                                  layout(xaxis = list(title = ""),
+                                         yaxis = list(title = "")))
+                       )
+            ),
+            fluidRow(
+                tags$small(
+                    tags$p(id = "tinytext",
+                           "Source: U.S. Department of Justice Federal Bureau of Investigation. Crime in the United States. Federal Bureau of Investigation, 2007–2017.")))
+        )
     })
 })
