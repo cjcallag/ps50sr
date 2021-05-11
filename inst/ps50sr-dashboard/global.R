@@ -6,7 +6,6 @@ file.copy(from = "inst/extdata/ps50sr.sqlite",
 # Load libraries ---------------------------------------------------------------
 library(data.table)
 library(DBI)
-library(ggplot2)
 library(leaflet)
 library(plotly)
 library(RSQLite)

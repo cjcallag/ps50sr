@@ -16,6 +16,7 @@ Imports:
     data.table,
     DBI,
     leaflet,
+    plotly,
     plumber,
     sf,
     shiny,

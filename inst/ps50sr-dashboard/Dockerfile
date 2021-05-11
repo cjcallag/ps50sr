@@ -45,5 +45,5 @@ CMD ["R", "-e", "ps50sr::launch_app(app = 'ps50sr-dashboard', use_browser = TRUE
 
 # Running the Dockerfile
 ## cd inst/
-## docker build -t my-shinyapp-image .
-## docker run -d --rm -p 3838:3838 my-shinyapp-image
+## docker build -t csg-shinyapp-image .
+## docker run -d --rm -p 3838:3838 csg-shinyapp-image
