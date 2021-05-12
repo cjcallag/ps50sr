@@ -41,9 +41,9 @@ RUN useradd shiny_user
 USER shiny_user
 
 # Run app on container start
-CMD ["R", "-e", "ps50sr::launch_app(app = 'ps50sr-dashboard', use_browser = TRUE)"]
+CMD ["R", "-e", "ps50sr::launch_api()"]
 
 # Running the Dockerfile
-## cd inst/ps50sr-dashboard/
-## docker build -t csg-shinyapp-image .
-## docker run -d --rm -p 3838:3838 csg-shinyapp-image
+## cd inst/api/
+## docker build -t csg-api-image .
+## docker run -d --rm -p 590:590 csg-api-image

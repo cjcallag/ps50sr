@@ -28,3 +28,17 @@ launch_app <- function(app = "ps50sr-dashboard", use_browser = TRUE, host = '0.0
   runApp(appDir = dir, launch.browser = use_browser, host = host, port = port,
          quiet = quiet)
 }
+
+#' @title Launch Plumber API
+#'
+#' @param host a string that is valid IPv3 or IPv6 address that is owner by this server
+#' @param port a number that indicates the server port that should be listened on
+#' @importFrom plumber plumb
+#'
+#' @export
+launch_api <- function(host = "0.0.0.0", port = 591) {
+  stopifnot("`host` must be character" = is.character(host) && length(host) == 1L)
+  stopifnot("`port` must be character" = is.numeric(port))
+  plumb(file = .sys_file("api/plumber.R"))$run(port = port, host = host)
+}
+

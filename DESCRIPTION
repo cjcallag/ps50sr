@@ -18,6 +18,7 @@ Imports:
     leaflet,
     plotly,
     plumber,
+    RSQLite,
     sf,
     shiny,
     shinycssloaders,

@@ -1,0 +1,12 @@
+name: ps50sr-dashboard
+title: ps50sr-dashboard
+username:
+account: cjcallag
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 4112507
+bundleId: 4584206
+url: https://cjcallag.shinyapps.io/ps50sr-dashboard/
+when: 1620708284.11015
+asMultiple: FALSE
+asStatic: FALSE
