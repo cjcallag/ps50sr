@@ -1,0 +1,15 @@
+{
+  "input": {
+    "arrests_state": "California",
+    "rates_state": "California",
+    "sidebarCollapsed": true,
+    "sidebarItemExpanded": null,
+    "tabs": "background"
+  },
+  "output": {
+
+  },
+  "export": {
+
+  }
+}

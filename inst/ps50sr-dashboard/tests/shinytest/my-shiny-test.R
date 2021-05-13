@@ -1,0 +1,13 @@
+app <- ShinyDriver$new("../../", seed = 123)
+app$snapshotInit("my-shiny-test")
+
+app$snapshot()
+app$snapshot()
+app$setInputs(sidebarCollapsed = FALSE)
+app$setInputs(tabs = "rates")
+app$snapshot()
+app$setInputs(tabs = "arrests")
+app$snapshot()
+app$setInputs(tabs = "crime")
+app$snapshot()
+app$setInputs(sidebarCollapsed = TRUE)

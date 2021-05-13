@@ -31,10 +31,10 @@ RUN apt-get -y update && apt-get -f install -y \
 
 
 ## Install R packages from CRAN:
-RUN R -e "install.packages('remotes', repos = 'http://cran.us.r-project.org')" -e "install.packages('RSQLite', repos = 'http://cran.us.r-project.org')" -e "install.packages('sf', configure.args = '--with-proj-include=/proj_home/include --with-proj-lib=/proj_home/lib --with-proj-api=no')" -e "remotes::install_github('cjcallag/ps50sr')"
+RUN R -e "install.packages('remotes', repos = 'http://cran.us.r-project.org')" -e "install.packages('RSQLite', repos = 'http://cran.us.r-project.org')" -e "install.packages('sf', configure.args = '--with-proj-include=/proj_home/include --with-proj-lib=/proj_home/lib --with-proj-api=no')" -e "remotes::install_github('cjcallag/ps50sr', force = TRUE)"
 
 ## Expose port
-EXPOSE 3838
+EXPOSE 591
 
 # Set non-root
 RUN useradd shiny_user
@@ -46,4 +46,4 @@ CMD ["R", "-e", "ps50sr::launch_api()"]
 # Running the Dockerfile
 ## cd inst/api/
 ## docker build -t csg-api-image .
-## docker run -d --rm -p 590:590 csg-api-image
+## docker run -d --rm -p 591:591 csg-api-image

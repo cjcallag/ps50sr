@@ -28,9 +28,10 @@ Imports:
 Suggests:
     knitr,
     shinytest,
-    testthat
+    testthat (>= 3.0.0)
 Remotes:
     rstudio/webdriver
 VignetteBuilder: knitr
 Depends:
     R (>= 3.5)
+Config/testthat/edition: 3

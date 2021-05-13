@@ -6,8 +6,9 @@
 \usage{
 .sys_file(file_path)
 }
+\arguments{
+\item{file_path}{Character of target file relative to \verb{/inst}}
+}
 \description{
 Use to access files in \verb{inst/}
-
-@param file_path Character of target file relative to \verb{/inst}
 }

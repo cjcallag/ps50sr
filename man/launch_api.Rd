@@ -4,7 +4,7 @@
 \alias{launch_api}
 \title{Launch Plumber API}
 \usage{
-launch_api(host = "0.0.0.0", port = 591)
+launch_api(host = "127.0.0.1", port = 591)
 }
 \arguments{
 \item{host}{a string that is valid IPv3 or IPv6 address that is owner by this server}
