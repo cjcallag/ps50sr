@@ -4,12 +4,14 @@
 \alias{launch_api}
 \title{Launch Plumber API}
 \usage{
-launch_api(host = "127.0.0.1", port = 591)
+launch_api(host = "0.0.0.0", port = 591, docs = FALSE)
 }
 \arguments{
 \item{host}{a string that is valid IPv3 or IPv6 address that is owner by this server}
 
 \item{port}{a number that indicates the server port that should be listened on}
+
+\item{docs}{a logical, if TRUE swagger docs will open on launch}
 }
 \description{
 Launch Plumber API

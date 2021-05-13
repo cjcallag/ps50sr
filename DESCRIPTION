@@ -21,7 +21,6 @@ Imports:
     RSQLite,
     sf,
     shiny,
-    shinycssloaders,
     shinydashboard,
     shinythemes,
     odbc
