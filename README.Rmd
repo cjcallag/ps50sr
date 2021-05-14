@@ -18,11 +18,14 @@ knitr::opts_chunk$set(
 
 <!-- badges: start -->
 [![Depends](https://img.shields.io/badge/Depends-GNU_R>=3.5-blue.svg)](https://www.r-project.org/)
+[![Travis build status](https://travis-ci.com/cjcallag/ps50sr.svg?branch=main)](https://travis-ci.com/cjcallag/ps50sr)
 <!-- badges: end -->
+
+## About
 
 **{ps50sr}** is a repository for the applications and tools developed by this author for an interview with the Council of State Government Justice Center. 
 
-In essence, this package is centered around the data found on the ["50-State Report on Public Safety" website](https://50statespublicsafety.us/). The data sets used to create dynamic visualizations on "Past 1, Strategy 1: Use data to understand crime trends" has been downloaded, reshaped and stored as a portable .sqlite database to serve as the backbone to this demonstration. For more information on how the data was procured and saved, please look at the documentation in this package: `docs/data-pulling/*`.
+In essence, this package is centered around the data found on the ["50-State Report on Public Safety" website](https://50statespublicsafety.us/). The data sets used to create dynamic visualizations on "Past 1, Strategy 1: Use data to understand crime trends" was downloaded, reshaped and stored as a portable .sqlite database to serve as the backbone to this demonstration. For more information on how the data was procured and saved, please look at the documentation on the repo: `docs/data-pulling/*`.
 
 ## Installation
 
@@ -33,7 +36,7 @@ if(!requireNamespace("remotes")) install.packages("remotes")
 remotes::install_github("cjcallag/ps50sr")
 ```
 
-With the package installed, you can proceed to use the functions either loading the library (`library(ps50sr)`) or via the namespace (`escaexplorer::`).
+With the package installed, you can proceed to use the functions either loading the library (`library(ps50sr)`) or via the namespace (`escaexplorer::`). 
 
 ## Fetching Data
 
@@ -43,7 +46,7 @@ Load library:
 library(ps50sr)
 ```
 
-Once you install and launch the package, you may access to the portable .sqlite database of state crimes and arrests data included as a system file within **{ps50sr}**. First, you will need to establish a connection to this portable database. Note that you will need the **{RSQLite}** and **{DBI}** packages to establish that connection:
+Once you install and launch the package, you may access to the portable .sqlite database of state crimes and arrests data as a system file within **{ps50sr}** package. First, you will need to establish a connection to this portable database. Note that you will need the **{RSQLite}** and **{DBI}** packages to establish that connection:
 
 ```{r}
 con <- DBI::dbConnect(drv = RSQLite::SQLite(),
@@ -89,7 +92,6 @@ ps50sr::launch_app(app = "ps50sr-dashboard",
 knitr::include_graphics(path = "docs/imgs/app.png")
 ```
 
-
 By default the function uses the "0.0.0.0" as the default IPv4 address and TCP port 3838. However, these parameters can be modified through the function's arguments. For more information, look at the documentation, `?escaexplorer::launch_app`.
 
 ## Launching **{plumber}** Web API
@@ -100,10 +102,10 @@ In addition to HTML applications, this package contains a web API that extends t
 ps50sr::launch_api(port = 591, docs = FALSE)
 ```
 
-With the API running you can visit this URL using a browser or a terminal to run your R function and get the results. For instance, http://localhost:8000/echo?msg=hello will echo back the ‘hello’ message you provided. Here a Mac terminal is used:
+With the API running you can visit this URL using a browser or a terminal to run your R function and get the results. For instance, http://localhost:591/echo?msg=hello will echo back the ‘hello’ message you provided. Here a Mac terminal is used:
 
 ```{bash, eval = FALSE}
-curl "http://localhost:8000/echo?msg=hello"
+curl "http://localhost:591/echo?msg=hello"
  {"msg":["The message is: 'hello'"]}
 ```
 
@@ -131,3 +133,35 @@ ps50sr::launch_api(port = 591, docs = TRUE)
 ```{r, echo = FALSE}
 knitr::include_graphics(path = "docs/imgs/api.png")
 ```
+
+## Docker Deployment
+
+For the purposes of encapsulating and deploying the **{shiny}** app and the **{plumber}** api, `Dockerfiles` have been provided under each directory. In order to run these you may need to clone the repo. Again, here a Mac terminal is used:
+
+```{bash, eval = FALSE}
+git clone https://github.com/cjcallag/ps50sr
+```
+
+If you have not, please install [Docker](https://www.docker.com/).
+
+To deploy the **{shiny}** app, navigate to the app folder inside the `inst` folder and build the Docker image with the `Dockerfile`:
+
+```{bash, eval = FALSE}
+cd inst/ps50sr-dashboard/
+docker build -t ps50sr-shinyapp .
+```
+
+Now run the image:
+
+```{bash, eval = FALSE}
+docker run --rm -p 3838:3838 ps50sr-shinyapp
+```
+
+The **{plumber}** API can be deployed similarly, like so:
+
+```{bash, eval = FALSE}
+cd inst/api/
+docker build -t ps50sr-api .
+docker run --rm -p 591:591 ps50sr-api
+```
+

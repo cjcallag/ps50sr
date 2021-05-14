@@ -35,6 +35,8 @@ RUN R -e "install.packages('remotes', repos = 'http://cran.us.r-project.org')" -
 
 ## Expose port
 EXPOSE 3838
+EXPOSE 590
+EXPOSE 8081
 
 # Set non-root
 RUN useradd shiny_user
@@ -45,5 +47,5 @@ CMD ["R", "-e", "ps50sr::launch_app(app = 'ps50sr-dashboard', use_browser = TRUE
 
 # Running the Dockerfile
 ## cd inst/ps50sr-dashboard/
-## docker build -t csg-shinyapp-image .
-## docker run -d --rm -p 3838:3838 csg-shinyapp-image
+## docker build -t ps50sr-shinyapp .
+## docker run --rm -p 3838:3838 csg-shinyapp-image
