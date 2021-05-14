@@ -1,8 +1,9 @@
-
+library(data.table)
 library(DBI)
 library(ggplot2)
 library(plumber)
 library(RSQLite)
+library(scales)
 
 
 #* @apiTitle ps50sr API
