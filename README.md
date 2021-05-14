@@ -11,8 +11,6 @@
 <!-- badges: start -->
 
 [![Depends](https://img.shields.io/badge/Depends-GNU_R%3E=3.5-blue.svg)](https://www.r-project.org/)
-[![Travis build
-status](https://travis-ci.com/cjcallag/ps50sr.svg?branch=main)](https://travis-ci.com/cjcallag/ps50sr)
 <!-- badges: end -->
 
 ## About
